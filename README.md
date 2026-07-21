@@ -1,6 +1,6 @@
 # calepin
 
-Mémoire projet durable pour agents de code. L'agent **query** la mémoire avant de travailler, **record** ce qu'il a appris après — et cette connaissance survit aux sessions, aux `/clear`, aux machines et aux harnais (Claude Code, Codex CLI, OpenCode…).
+Mémoire projet durable pour agents de code. L'agent **query** la mémoire avant de travailler, **record** ce qu'il a appris après, et cette connaissance survit aux sessions, aux `/clear`, aux machines et aux harnais (Claude Code, Codex CLI, OpenCode…).
 
 Local-first, sans compte, sans serveur. Une seule dépendance.
 
@@ -24,20 +24,20 @@ calepin record architecture/choix-auth --title "Auth par passkeys" \
 EOF
 ```
 
-Sortie de `query` : JSON avec hits scorés, `should_cite` et un `citation_block` prêt à coller — l'utilisateur voit d'où vient le contexte.
+Sortie de `query` : JSON avec hits scorés, `should_cite` et un `citation_block` prêt à coller, l'utilisateur voit d'où vient le contexte.
 
 ## Deux espaces
 
 | Espace | Où | Partage |
 |---|---|---|
-| **équipe** | `.calepin/` à la racine du repo | via le repo lui-même — versionné, PR, permissions git. Cible par défaut de `record`. |
+| **équipe** | `.calepin/` à la racine du repo | via le repo lui-même, versionné, PR, permissions git. Cible par défaut de `record`. |
 | **perso** | `~/.calepin/spaces/<nom>/` (`calepin bind <nom>`) | privé ; multi-machines via `calepin sync` (git). |
 
 `query` fusionne les deux. Pas de backend, pas de compte : le repo du projet **est** l'infra de partage.
 
 ## Retrieval hybride
 
-BM25 pondéré par champ (exact-match : identifiants, chemins) + embeddings multilingues locaux (e5-small, ~130 Mo téléchargés au premier run) fusionnés par RRF. Mémoire bilingue fr/en comprise — une query française retrouve un sujet rédigé en anglais. Modèle absent ou `--no-embed` → fallback BM25 pur, jamais bloquant.
+BM25 pondéré par champ (exact-match : identifiants, chemins) + embeddings multilingues locaux (e5-small, ~130 Mo téléchargés au premier run) fusionnés par RRF. Mémoire bilingue fr/en comprise, une query française retrouve un sujet rédigé en anglais. Modèle absent ou `--no-embed` → fallback BM25 pur, jamais bloquant.
 
 Queries lentes en CLI (rechargement du modèle à chaque process) ? Lancez le daemon :
 
@@ -59,7 +59,7 @@ calepin cache gc                                   # purge vecteurs vieux + hits
 
 ## Toutes les commandes
 
-`bind` · `current` · `record` · `query` · `read [--pretty]` · `remove` · `dream` · `sync` · `serve [--stop]` · `cache gc` · `onboard` — détail : `calepin --help`.
+`bind` · `current` · `record` · `query` · `read [--pretty]` · `remove` · `dream` · `sync` · `serve [--stop]` · `cache gc` · `onboard`, détail : `calepin --help`.
 
 ## Développement
 
