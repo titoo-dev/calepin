@@ -1,8 +1,10 @@
 {
   "name": "calepin",
   "version": "0.1.0",
-  "description": "Mémoire projet durable pour agents de code — clone local-first de Byterover.",
+  "description": "Mémoire projet durable pour agents de code — local-first, retrieval hybride BM25+embeddings, partage équipe via git.",
   "type": "module",
+  "keywords": ["ai-agents", "memory", "claude-code", "retrieval", "local-first", "cli"],
+  "files": ["calepin.mjs", "lib/", "skills/", "LICENSE", "README.md"],
   "bin": {
     "calepin": "./calepin.mjs"
   },
