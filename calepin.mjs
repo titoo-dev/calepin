@@ -3,13 +3,17 @@
 // Sortie JSON sur stdout pour query/current, messages humains sur stderr.
 
 import fs from 'node:fs';
-import { parseTopic } from './lib/format.mjs';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { parseTopic, renderPretty } from './lib/format.mjs';
 import * as store from './lib/store.mjs';
-import { search, hybridSearch, shouldCite, citationBlock } from './lib/search.mjs';
 import { getEmbedder, getEmbedderFailureReason, embedTopics } from './lib/embed.mjs';
-import { loadHits, recordHits } from './lib/hits.mjs';
+import { loadHits, removeHit } from './lib/hits.mjs';
 import { dream } from './lib/dream.mjs';
 import * as sync from './lib/sync.mjs';
+import { runQuery } from './lib/query.mjs';
+import { clientRequest, startServer, stopServer } from './lib/serve.mjs';
+import { gc } from './lib/cache.mjs';
 
 const HELP = `calepin — mémoire projet durable pour agents de code
 
@@ -18,12 +22,18 @@ Usage:
   calepin current                                   liste les espaces actifs (JSON)
   calepin record <categorie/slug> --title "T" --keywords "a,b" [--space equipe|perso] --html -
                                                       enregistre un sujet (enfants cal-* sur stdin)
+  calepin remove <categorie/slug> [--space <label>] supprime un sujet (fichier + hits.json)
   calepin query "<question>" [--limit 5] [--space <label>] [--no-embed]
                                                       cherche dans les espaces actifs (JSON)
-  calepin read <categorie/slug> [--space <label>]    dump brut d'un sujet
+  calepin read <categorie/slug> [--space <label>] [--pretty]
+                                                      dump d'un sujet (brut, ou lisible avec --pretty)
   calepin dream --mode merge|link|prune|synthesize [--min-score X] [--limit 10] [--space <label>] [--no-embed]
                                                       propose des consolidations (ne modifie rien)
   calepin sync [nom]                                 sync git des espaces perso (tous, ou <nom>)
+  calepin serve                                      daemon local : embedder chaud, socket Unix
+  calepin serve --stop                               arrête le daemon
+  calepin cache gc [--max-age 90]                    purge les caches (vecteurs) + hits.json orphelins
+  calepin onboard [--perso <nom>]                     crée .calepin/topics/, affiche le cycle query/record
   calepin --help                                     cette aide
 
 Variables d'environnement:
@@ -47,7 +57,7 @@ function fail(message) {
 
 // ponytail: flags booléens (sans valeur qui suit) listés à la main — le
 // parseur reste un simple découpage --clé valeur, pas un vrai parseur CLI.
-const BOOLEAN_FLAGS = new Set(['no-embed']);
+const BOOLEAN_FLAGS = new Set(['no-embed', 'stop', 'pretty']);
 
 function parseArgs(argv) {
   const positional = [];
@@ -171,60 +181,53 @@ function cmdRecord(positional, flags) {
   process.stderr.write(`sujet enregistré: ${target.label}/${topicPath} (${file})\n`);
 }
 
-async function cmdQuery(positional, flags) {
-  const question = positional[0];
-  if (!question) fail('query: question requise (calepin query "<question>")');
-  const limit = flags.limit ? parseInt(flags.limit, 10) : 5;
-  if (flags['no-embed']) process.env.CALEPIN_NO_EMBED = '1';
+// Symétrique de record : résolution d'espace comme read (premier match parmi
+// les espaces actifs, ou --space précis), ferme la boucle dream (merge/prune
+// proposent, l'agent applique record+remove).
+function cmdRemove(positional, flags) {
+  const topicPath = positional[0];
+  if (!topicPath) fail('remove: chemin de sujet requis (calepin remove <categorie/slug>)');
+  try {
+    store.validateTopicPath(topicPath);
+  } catch (err) {
+    fail(err.message);
+  }
 
   let spaces = store.activeSpaces(process.cwd());
   if (flags.space) {
     spaces = spaces.filter((s) => s.label === flags.space);
+    if (spaces.length === 0) fail(`remove: espace "${flags.space}" introuvable`);
   }
 
-  // ponytail: reparse intégral du corpus à chaque appel, pas d'index
-  // persistant — cache d'index en P2 si le corpus dépasse ~1000 sujets.
-  const topics = [];
   for (const space of spaces) {
-    for (const entry of store.listTopics(space)) {
-      const raw = store.readTopic(space, entry.path);
-      if (raw == null) continue;
-      topics.push({ space: entry.space, path: entry.path, obj: parseTopic(raw), raw });
+    if (store.removeTopic(space, topicPath)) {
+      removeHit(`${space.label}/${topicPath}`);
+      process.stderr.write(`sujet supprimé: ${space.label}/${topicPath}\n`);
+      return;
     }
   }
+  fail(`remove: sujet "${topicPath}" introuvable dans les espaces actifs`);
+}
 
-  let hits;
-  let mode;
-  const embedder = await getEmbedder();
-  if (embedder) {
-    try {
-      const [queryVector] = await embedder.embed([`query: ${question}`]);
-      const topicVectors = await embedTopics(topics, embedder);
-      hits = hybridSearch(topics, question, { limit, queryVector, topicVectors });
-      mode = 'hybrid';
-    } catch (err) {
-      process.stderr.write(`calepin: embeddings indisponibles (${err.message}), fallback BM25\n`);
-      hits = search(topics, question, limit);
-      mode = 'bm25';
-    }
-  } else {
-    process.stderr.write(
-      `calepin: embeddings indisponibles (${getEmbedderFailureReason() ?? 'raison inconnue'}), fallback BM25\n`
-    );
-    hits = search(topics, question, limit);
-    mode = 'bm25';
+async function cmdQuery(positional, flags) {
+  const question = positional[0];
+  if (!question) fail('query: question requise (calepin query "<question>")');
+  const limit = flags.limit ? parseInt(flags.limit, 10) : 5;
+  const noEmbed = Boolean(flags['no-embed']);
+  if (noEmbed) process.env.CALEPIN_NO_EMBED = '1'; // fallback in-process : désactive l'embedder pour tout le process
+  const space = flags.space ?? null;
+
+  // Daemon d'abord (embedder chaud, voir calepin serve) : connexion + timeout
+  // courts, JAMAIS d'erreur à cause du daemon — absent/mort/lent -> in-process.
+  const req = { op: 'query', cwd: process.cwd(), question, limit, space, noEmbed };
+  const served = await clientRequest(req);
+  if (served && !served.error) {
+    process.stdout.write(JSON.stringify({ ...served, served: true }, null, 2) + '\n');
+    return;
   }
 
-  recordHits(hits);
-
-  const out = {
-    hits,
-    query: question,
-    should_cite: shouldCite(hits),
-    citation_block: citationBlock(hits),
-    mode,
-  };
-  process.stdout.write(JSON.stringify(out, null, 2) + '\n');
+  const out = await runQuery({ cwd: process.cwd(), question, limit, space, noEmbed });
+  process.stdout.write(JSON.stringify({ ...out, served: false }, null, 2) + '\n');
 }
 
 function cmdRead(positional, flags) {
@@ -240,7 +243,7 @@ function cmdRead(positional, flags) {
   for (const space of spaces) {
     const raw = store.readTopic(space, topicPath);
     if (raw != null) {
-      process.stdout.write(raw);
+      process.stdout.write(flags.pretty ? renderPretty(parseTopic(raw)) : raw);
       return;
     }
   }
@@ -304,6 +307,55 @@ function cmdSync(positional) {
   if (failed) process.exit(1);
 }
 
+async function cmdServe(flags) {
+  if (flags.stop) {
+    const result = stopServer();
+    process.stderr.write(`${result.message}\n`);
+    if (!result.ok) process.exit(1);
+    return;
+  }
+  try {
+    await startServer();
+  } catch (err) {
+    fail(err.message);
+  }
+}
+
+function cmdCache(positional, flags) {
+  const sub = positional[0];
+  if (sub !== 'gc') fail(`cache: sous-commande inconnue "${sub ?? ''}" (calepin cache gc)`);
+  const maxAgeDays = flags['max-age'] ? parseFloat(flags['max-age']) : 90;
+  const result = gc(maxAgeDays, process.cwd());
+  process.stderr.write(
+    `cache gc: ${result.filesRemoved} fichier(s) de cache supprimé(s) (${result.bytesFreed} octets), ` +
+      `${result.hitsRemoved} entrée(s) hits.json orpheline(s)\n`
+  );
+}
+
+function cmdOnboard(flags) {
+  const gitRoot = spawnSync('git', ['rev-parse', '--show-toplevel'], { cwd: process.cwd(), encoding: 'utf8' });
+  const root = gitRoot.status === 0 ? gitRoot.stdout.trim() : process.cwd();
+  const topicsDir = path.join(root, '.calepin', 'topics');
+  const alreadyThere = fs.existsSync(topicsDir);
+  fs.mkdirSync(topicsDir, { recursive: true });
+
+  if (flags.perso) {
+    store.bind(process.cwd(), flags.perso);
+  }
+
+  const spaces = store.activeSpaces(process.cwd());
+  process.stderr.write(
+    `${alreadyThere ? 'espace équipe déjà présent' : 'espace équipe créé'}: ${topicsDir}\n` +
+      `espaces actifs: ${spaces.map((s) => s.label).join(', ') || 'aucun'}\n\n` +
+      'Cycle : query AVANT une tâche non triviale (les hits sont des contraintes), record APRÈS un travail utile.\n\n' +
+      '  calepin query "termes de la tâche" --limit 5\n' +
+      '  calepin record architecture/exemple --title "Titre" --keywords "a,b" --html - <<\'EOF\'\n' +
+      '  <cal-decision>Décision prise.</cal-decision>\n' +
+      '  EOF\n' +
+      '  calepin current\n'
+  );
+}
+
 async function main() {
   const [, , command, ...rest] = process.argv;
 
@@ -321,6 +373,8 @@ async function main() {
       return cmdCurrent();
     case 'record':
       return cmdRecord(positional, flags);
+    case 'remove':
+      return cmdRemove(positional, flags);
     case 'query':
       return await cmdQuery(positional, flags);
     case 'read':
@@ -329,6 +383,12 @@ async function main() {
       return await cmdDream(positional, flags);
     case 'sync':
       return cmdSync(positional);
+    case 'serve':
+      return await cmdServe(flags);
+    case 'cache':
+      return cmdCache(positional, flags);
+    case 'onboard':
+      return cmdOnboard(flags);
     default:
       fail(`commande inconnue: "${command}" (calepin --help)`);
   }

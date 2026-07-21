@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseTopic, serializeTopic } from '../lib/format.mjs';
+import { parseTopic, serializeTopic, renderPretty } from '../lib/format.mjs';
 
 test('roundtrip: serialize -> parse restitue le même objet', () => {
   const obj = {
@@ -79,4 +79,52 @@ test('échappe les entités dans les attributs et le texte à la sérialisation'
   const parsed = parseTopic(html);
   assert.equal(parsed.title, obj.title);
   assert.equal(parsed.decisions[0], obj.decisions[0]);
+});
+
+test('renderPretty: titre + sections labellisées + narration, texte simple sans balises', () => {
+  const obj = parseTopic(
+    serializeTopic({
+      title: 'Auth — daemon',
+      keywords: ['auth', 'daemon'],
+      created: '2026-07-01',
+      updated: '2026-07-10',
+      decisions: ['On garde le refresh en keychain.'],
+      reasons: ['Fuite historique.'],
+      facts: ['Le daemon tourne en user-space.'],
+      rules: ['Jamais logger le token.'],
+      files: ['src/auth/daemon.ts'],
+      links: ['architecture/overview'],
+      narration: 'Une phrase de narration libre.',
+    })
+  );
+
+  const out = renderPretty(obj);
+  assert.match(out, /^Auth — daemon\n/);
+  assert.match(out, /mots-clés: auth, daemon/);
+  assert.match(out, /créé: 2026-07-01, mis à jour: 2026-07-10/);
+  assert.match(out, /Décision:\n {2}- On garde le refresh en keychain\./);
+  assert.match(out, /Raison:\n {2}- Fuite historique\./);
+  assert.match(out, /Faits:\n {2}- Le daemon tourne en user-space\./);
+  assert.match(out, /Règles:\n {2}- Jamais logger le token\./);
+  assert.match(out, /Fichiers:\n {2}- src\/auth\/daemon\.ts/);
+  assert.match(out, /Liens:\n {2}- architecture\/overview/);
+  assert.match(out, /Narration:\n {2}Une phrase de narration libre\./);
+  assert.ok(!out.includes('<cal-'), 'aucune balise cal-* ne doit apparaître dans le rendu');
+});
+
+test('renderPretty: sujet minimal (rien que le titre) ne plante pas', () => {
+  const out = renderPretty({
+    title: 'Vide',
+    keywords: [],
+    created: '',
+    updated: '',
+    decisions: [],
+    reasons: [],
+    facts: [],
+    rules: [],
+    files: [],
+    links: [],
+    narration: '',
+  });
+  assert.equal(out, 'Vide\n');
 });

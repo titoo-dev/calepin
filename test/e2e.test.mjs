@@ -69,6 +69,13 @@ test('e2e: bind, record de 3 sujets, query retrouve le bon, read dump le brut', 
   assert.equal(readRes.status, 0, readRes.stderr);
   assert.match(readRes.stdout, /<cal-topic /);
   assert.match(readRes.stdout, /Refresh token en keychain/);
+
+  const readPrettyRes = runCli(['read', 'auth/daemon', '--pretty'], { cwd: projectDir, home });
+  assert.equal(readPrettyRes.status, 0, readPrettyRes.stderr);
+  assert.ok(!readPrettyRes.stdout.includes('<cal-'), 'pas de balise brute en mode --pretty');
+  assert.match(readPrettyRes.stdout, /Auth — daemon de sync/);
+  assert.match(readPrettyRes.stdout, /Décision:/);
+  assert.match(readPrettyRes.stdout, /Refresh token en keychain, jamais sur disque\./);
 });
 
 test('e2e: query hors-sujet renvoie should_cite=false', () => {

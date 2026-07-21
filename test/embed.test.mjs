@@ -90,6 +90,42 @@ test('embedTopics: sans embedder (null), retourne une Map vide sans planter', as
   });
 });
 
+test('embedQuery: 2e appel avec la même question n\'embed rien (cache par hash)', async () => {
+  await withTmpHome(async (home) => {
+    const { embedQuery } = await import('../lib/embed.mjs');
+
+    const embedder1 = spyEmbedder();
+    const v1 = await embedQuery('daemon de sync', embedder1);
+    assert.equal(embedder1.calls, 1);
+
+    const embedder2 = spyEmbedder();
+    const v2 = await embedQuery('daemon de sync', embedder2);
+    assert.equal(embedder2.calls, 0, 'question déjà en cache, aucun embed() ne devrait être appelé');
+    assert.deepEqual(Array.from(v2), Array.from(v1));
+
+    const cacheDir = path.join(home, 'cache', 'queries');
+    assert.equal(fs.readdirSync(cacheDir).length, 1);
+  });
+});
+
+test('embedQuery: question différente -> ré-embed, cache séparé', async () => {
+  await withTmpHome(async () => {
+    const { embedQuery } = await import('../lib/embed.mjs');
+    const embedder = spyEmbedder();
+    await embedQuery('question A', embedder);
+    assert.equal(embedder.calls, 1);
+    await embedQuery('question B', embedder);
+    assert.equal(embedder.calls, 2);
+  });
+});
+
+test('embedQuery: embedder null -> retourne null sans planter', async () => {
+  await withTmpHome(async () => {
+    const { embedQuery } = await import('../lib/embed.mjs');
+    assert.equal(await embedQuery('question', null), null);
+  });
+});
+
 test('CALEPIN_NO_EMBED force getEmbedder() à retourner null', async () => {
   const prev = process.env.CALEPIN_NO_EMBED;
   process.env.CALEPIN_NO_EMBED = '1';

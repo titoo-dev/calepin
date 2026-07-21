@@ -25,6 +25,7 @@ Sortie JSON : `hits` (avec `path`, `space`, `score`, `snippet`), `should_cite`, 
 - Si `should_cite` est `true` : inclure `citation_block` tel quel dans ta réponse (l'utilisateur voit d'où vient le contexte).
 - Détail complet d'un hit : `calepin read <categorie/slug> [--space <label>]`.
 - 0 hit pertinent = OK, continue — mais tu viens d'apprendre que ce terrain n'est pas couvert : raison de plus de record après.
+- Query froide (rechargement du pipeline d'embeddings à chaque process) coûte ~1s. Si les queries sont visiblement lentes sur une session longue, proposer à l'utilisateur de lancer `calepin serve` en arrière-plan une fois (embedder chargé une seule fois, socket local) — `query` s'en sert automatiquement dès qu'il tourne (`served: true` dans la sortie), sans rien changer côté agent.
 
 ## Record — après le travail
 
@@ -56,12 +57,12 @@ Règles :
 `calepin dream --mode merge|link|prune|synthesize [--min-score X] [--limit 10] [--space <label>] [--no-embed]` analyse les sujets des espaces actifs et **propose** des consolidations. **Dream ne modifie jamais rien** — c'est toi (l'agent) qui appliques chaque candidat retenu via `record` (fusion, ajout d'un `cal-link`) ou suppression du fichier, et **l'humain valide** : en perso directement, en équipe via la revue de la PR qui contient le changement.
 
 Les 4 modes :
-- `merge` — paires de sujets quasi-doublons (même decision/facts reformulés) : fusionner en un seul `record`, supprimer l'autre.
+- `merge` — paires de sujets quasi-doublons (même decision/facts reformulés) : fusionner en un seul `record`, supprimer l'autre via `calepin remove <categorie/slug>`.
 - `link` — paires moyennement proches mais pas encore reliées : ajouter un `<cal-link>` réciproque (ou pas, si l'utilisateur juge que non).
-- `prune` — sujets probablement morts (jamais retrouvés en query, peu de contenu, jamais liés, vieux) : proposer la suppression à l'utilisateur, jamais la faire d'autorité.
-- `synthesize` — clusters de sujets proches et nombreux dans un même namespace : proposer de les regrouper en un sujet de synthèse plus riche.
+- `prune` — sujets probablement morts (jamais retrouvés en query, peu de contenu, jamais liés, vieux) : proposer la suppression à l'utilisateur, jamais la faire d'autorité ; si accepté, `calepin remove <categorie/slug> [--space <label>]`.
+- `synthesize` — clusters de sujets proches et nombreux dans un même namespace : proposer de les regrouper en un sujet de synthèse plus riche (le nouveau `record`, puis `remove` sur les sujets absorbés).
 
-Chaque candidat a une `reason` en français concret (ex. « cosinus 0.93, mêmes keywords à 80% »). Ne jamais traiter la sortie de `dream` comme une action déjà faite : c'est une liste à trier avec l'utilisateur.
+Chaque candidat a une `reason` en français concret (ex. « cosinus 0.93, mêmes keywords à 80% »). Ne jamais traiter la sortie de `dream` comme une action déjà faite : c'est une liste à trier avec l'utilisateur — appliquer via `record`/`remove`, jamais en silence.
 
 ## Sync — espaces perso multi-machines
 
@@ -69,9 +70,8 @@ Chaque candidat a une `reason` en français concret (ex. « cosinus 0.93, mêmes
 
 ## Onboarding — sur « onboard with calepin »
 
-1. `calepin current` — liste les espaces actifs.
-2. Aucun espace ? Proposer : `mkdir -p .calepin/topics` à la racine du repo (mémoire d'équipe, versionnée) et/ou `calepin bind <nom>` (mémoire perso).
-3. Montrer le cycle sur un exemple : une query, puis un premier record d'une décision existante du projet.
+1. `calepin onboard [--perso <nom>]` — crée `.calepin/topics/` à la racine du repo (racine git si dispo, sinon cwd) si absent, bind l'espace perso `<nom>` en plus si fourni, affiche les espaces actifs et le cycle query/record. Idempotent, se relance sans risque.
+2. Montrer le cycle sur un exemple : une query, puis un premier record d'une décision existante du projet.
 
 ## Problèmes
 

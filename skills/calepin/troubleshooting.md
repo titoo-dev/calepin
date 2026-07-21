@@ -31,3 +31,15 @@ L'espace perso n'a jamais été initialisé en dépôt git. Suivre exactement le
 
 ## `dream: --mode requis parmi merge|link|prune|synthesize`
 Flag `--mode` manquant ou mal orthographié. Un seul mode par appel.
+
+## `calepin serve` — `daemon déjà actif`
+Normal et sans danger : un daemon répond déjà sur le socket, celui-ci ne fait rien et sort (exit 0). Utile pour lancer `calepin serve` depuis un hook sans jamais empiler de daemons. Pour le redémarrer : `calepin serve --stop` puis relancer.
+
+## `calepin serve --stop` — `aucun daemon actif (pidfile absent)`
+Aucun daemon ne tourne (jamais lancé, ou déjà arrêté). Rien à faire.
+
+## Query lente malgré tout après `calepin serve`
+Vérifier que le daemon tourne bien depuis CE projet (`calepin current` doit résoudre les mêmes espaces) et que la sortie JSON de `query` contient `"served": true`. `false` = le socket était absent/mort/trop lent : la query est retombée en in-process (jamais d'erreur pour autant), mais sans le gain de latence.
+
+## `remove: sujet "..." introuvable dans les espaces actifs`
+Le chemin ou l'espace (`--space`) ne correspond à aucun sujet existant — vérifier avec `calepin read <chemin>` ou `calepin current` d'abord.
