@@ -5,6 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { parseTopic, renderPretty } from './lib/format.mjs';
 import * as store from './lib/store.mjs';
 import { getEmbedder, getEmbedderFailureReason, embedTopics } from './lib/embed.mjs';
@@ -34,6 +35,8 @@ Usage:
   calepin serve --stop                               arrête le daemon
   calepin cache gc [--max-age 90]                    purge les caches (vecteurs) + hits.json orphelins
   calepin onboard [--perso <nom>]                     crée .calepin/topics/, affiche le cycle query/record
+                                                      (TUI guidée si lancé depuis un terminal interactif)
+  calepin ui                                         menu interactif (parcourir, rechercher, dream, espaces...)
   calepin --help                                     cette aide
 
 Variables d'environnement:
@@ -356,6 +359,40 @@ function cmdOnboard(flags) {
   );
 }
 
+// Routage TUI (voir docs/adr/0004) : `ui` toujours, `onboard` seulement sur un
+// TTY interactif — sinon cmdOnboard ci-dessus reste inchangé. dist/ui.js est
+// buildé par `npm run build` (tsup), jamais committé ; absent -> message une
+// ligne + repli sur le comportement standard, exit 0.
+function uiDistPath() {
+  return path.join(path.dirname(fileURLToPath(import.meta.url)), 'dist', 'ui.js');
+}
+
+async function loadUi() {
+  const distPath = uiDistPath();
+  if (!fs.existsSync(distPath)) {
+    process.stderr.write('calepin: TUI non construite — lance `npm run build` (repli sur le comportement standard)\n');
+    return null;
+  }
+  return import(distPath);
+}
+
+async function cmdUi() {
+  const ui = await loadUi();
+  if (!ui) return;
+  await ui.runUi();
+}
+
+async function cmdOnboardRouted(flags) {
+  if (process.stdout.isTTY && process.stdin.isTTY) {
+    const ui = await loadUi();
+    if (ui) {
+      await ui.runOnboardTui(flags);
+      return;
+    }
+  }
+  cmdOnboard(flags);
+}
+
 async function main() {
   const [, , command, ...rest] = process.argv;
 
@@ -388,7 +425,9 @@ async function main() {
     case 'cache':
       return cmdCache(positional, flags);
     case 'onboard':
-      return cmdOnboard(flags);
+      return await cmdOnboardRouted(flags);
+    case 'ui':
+      return await cmdUi();
     default:
       fail(`commande inconnue: "${command}" (calepin --help)`);
   }

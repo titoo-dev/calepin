@@ -1,5 +1,13 @@
 # Changelog
 
+
+## 0.2.0 — 2026-07-21
+
+- **TUI** (`calepin ui`) : menu interactif (clack + ink) — parcourir les sujets (filtre, rendu pretty, suppression), recherche hybride avec citation copiable, revue dream candidat par candidat avec application guidée, gestion des espaces (bind/sync/création), formulaire nouveau sujet avec aperçu.
+- **Onboarding interactif** : `calepin onboard` sur TTY devient un flow guidé skippable ; comportement non-TTY inchangé.
+- Cœur .mjs strictement intact (ADR 0004) : mêmes commandes, même JSON — les agents ne voient aucune différence.
+- Typecheck TS (`tsc --noEmit`) branché dans prepublishOnly ; types .d.mts co-localisés sur lib/.
+
 ## 0.1.0 — 2026-07-21
 
 Première version publiable.

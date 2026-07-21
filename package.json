@@ -1,6 +1,6 @@
 {
   "name": "calepin",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Mémoire projet durable pour agents de code — local-first, retrieval hybride BM25+embeddings, partage équipe via git.",
   "type": "module",
   "keywords": [
@@ -22,6 +22,7 @@
     "calepin.mjs",
     "lib/",
     "skills/",
+    "dist/",
     "LICENSE",
     "README.md"
   ],
@@ -33,13 +34,26 @@
   },
   "scripts": {
     "test": "node --test",
+    "typecheck": "tsc --noEmit",
+    "build": "tsup",
+    "prepublishOnly": "npm run typecheck && npm run build && npm test",
     "eval": "node eval/run.mjs",
     "eval:dream": "node eval/run-dream.mjs",
     "bench": "node eval/bench.mjs"
   },
   "license": "MIT",
   "dependencies": {
-    "@huggingface/transformers": "^4.2.0"
+    "@clack/prompts": "^1.0.0",
+    "@huggingface/transformers": "^4.2.0",
+    "ink": "^7.1.1",
+    "picocolors": "^1.1.1",
+    "react": "^19.2.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "tsup": "^8.5.1",
+    "typescript": "^5.8.0"
   },
   "overrides": {
     "adm-zip": "^0.6.0"

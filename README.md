@@ -59,7 +59,7 @@ calepin cache gc                                   # purge vecteurs vieux + hits
 
 ## Toutes les commandes
 
-`bind` · `current` · `record` · `query` · `read [--pretty]` · `remove` · `dream` · `sync` · `serve [--stop]` · `cache gc` · `onboard`, détail : `calepin --help`.
+`ui` (interface interactive) · `bind` · `current` · `record` · `query` · `read [--pretty]` · `remove` · `dream` · `sync` · `serve [--stop]` · `cache gc` · `onboard`, détail : `calepin --help`.
 
 ## Développement
 
