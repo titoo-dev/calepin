@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 
 const ROOT = path.join(import.meta.dirname, '..');
 const CLI = path.join(ROOT, 'calepin.mjs');
@@ -77,6 +77,84 @@ if (fs.existsSync(DIST)) {
   }
 } else {
   console.log('(dist/ui.js absent — étapes 3/4 sautées ; lance `npm run build` pour les couvrir)');
+}
+
+// 5. Scénario pty réel (voir docs/adr/0004) : `calepin ui` sous un vrai
+// pseudo-terminal (ink exige le raw mode, indisponible sur un pipe), on tape
+// j, k, ?, esc, :q<entrée> comme un humain (touche par touche — un seul
+// `write` multi-caractères serait interprété par ink comme un COLLAGE, pas
+// des frappes séparées, et ne déclencherait pas les bindings). Vérifie exit 0
+// ET la restauration du buffer alternatif (présence de \x1b[?1049l).
+// ponytail: `script` (util-linux, déjà sur la machine) alloue le pty sans
+// dépendance npm (node n'a pas de pty natif) ; sauté si absent (ex: script
+// BSD sur macOS a une syntaxe différente) — upgrade path: node-pty si un jour
+// ce smoke doit tourner en CI multi-plateforme.
+async function runPtyScenario() {
+  const home = tmpHome();
+  const cmd = `${process.execPath} ${CLI} ui`;
+
+  return new Promise((resolve) => {
+    let child;
+    try {
+      child = spawn('script', ['-qec', cmd, '/dev/null'], {
+        cwd: home.project,
+        env: { ...process.env, CALEPIN_HOME: home.calepin, CALEPIN_NO_EMBED: '1', TERM: 'xterm' },
+      });
+    } catch (err) {
+      resolve({ skipped: true, reason: err.message });
+      return;
+    }
+
+    let output = '';
+    let settled = false;
+    child.stdout?.on('data', (d) => (output += d.toString('latin1')));
+    child.stderr?.on('data', (d) => (output += d.toString('latin1')));
+    child.on('error', (err) => {
+      if (settled) return;
+      settled = true;
+      resolve({ skipped: true, reason: err.message });
+    });
+    child.on('exit', (code) => {
+      if (settled) return;
+      settled = true;
+      resolve({ skipped: false, code, output });
+    });
+
+    const hardTimeout = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      child.kill('SIGKILL');
+      resolve({ skipped: false, code: null, output, timedOut: true });
+    }, 15_000);
+    child.on('exit', () => clearTimeout(hardTimeout));
+
+    const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+    (async () => {
+      await delay(1200); // laisser node démarrer + ink monter le 1er rendu
+      for (const key of ['j', 'k', '?', '\x1b', ':', 'q', '\r']) {
+        if (settled) return;
+        child.stdin.write(key);
+        await delay(150);
+      }
+    })().catch(() => {});
+  });
+}
+
+if (fs.existsSync(DIST)) {
+  const ptyResult = await runPtyScenario();
+  if (ptyResult.skipped) {
+    console.log(`(scénario pty sauté — ${ptyResult.reason})`);
+  } else if (ptyResult.timedOut) {
+    fail('scénario pty: timeout, calepin ui ne répond pas à :q<entrée>');
+  } else if (ptyResult.code !== 0) {
+    fail(`scénario pty: exit ${ptyResult.code} (attendu 0)`);
+  } else if (!ptyResult.output.includes('\x1b[?1049l')) {
+    fail("scénario pty: buffer alternatif non restauré (\\x1b[?1049l absent de la sortie)");
+  } else {
+    console.log('ok: scénario pty (j, k, ?, esc, :q<entrée>) -> exit 0, buffer restauré');
+  }
+} else {
+  console.log('(scénario pty sauté — dist/ui.js absent)');
 }
 
 if (process.exitCode) {

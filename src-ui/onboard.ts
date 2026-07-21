@@ -9,7 +9,7 @@ import pc from 'picocolors';
 import * as store from '../lib/store.mjs';
 import { loadTopics, queryMemory } from '../lib/ui-logic.mjs';
 import { banner, orAbort } from './ui.js';
-import { newTopicForm } from './new-topic.js';
+import { runUi } from './app.js';
 
 export async function runOnboardTui(flags: { perso?: string }): Promise<void> {
   const cwd = process.cwd();
@@ -74,9 +74,6 @@ export async function runOnboardTui(flags: { perso?: string }): Promise<void> {
     }
   }
 
-  const wantRecord = orAbort(await p.confirm({ message: 'Enregistrer un premier sujet maintenant ?', initialValue: false }));
-  if (wantRecord) await newTopicForm(cwd);
-
   p.outro(
     [
       pc.dim('Cycle essentiel :'),
@@ -85,4 +82,7 @@ export async function runOnboardTui(flags: { perso?: string }): Promise<void> {
       '  calepin current',
     ].join('\n')
   );
+
+  const wantUi = orAbort(await p.confirm({ message: 'Ouvrir l\'espace calepin ?', initialValue: true }));
+  if (wantUi) await runUi();
 }
