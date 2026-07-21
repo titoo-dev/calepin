@@ -1,0 +1,30 @@
+name: Bug
+description: Quelque chose ne marche pas
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: "calepin@0.1.0 / commit abc123"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Commande exacte et sortie complète
+      description: Copier-coller tel quel (retirer tout secret éventuel)
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportement attendu
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environnement
+      placeholder: "Linux/macOS, Node 22, mode hybrid ou bm25"

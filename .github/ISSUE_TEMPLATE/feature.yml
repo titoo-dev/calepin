@@ -1,0 +1,20 @@
+name: Proposition
+description: Une amélioration ou fonctionnalité
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problème à résoudre
+      description: Le besoin concret, pas la solution
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposition
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives déjà envisagées
+      description: Le projet est volontairement minimal (voir CONTRIBUTING) — la barre pour une nouvelle dépendance ou commande est haute
