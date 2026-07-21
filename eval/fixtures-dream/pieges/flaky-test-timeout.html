@@ -1,0 +1,7 @@
+<cal-topic title="Tests instables a cause d un timeout trop court" keywords="tests, flaky, timeout, ci" created="2026-03-16" updated="2026-03-16">
+  <cal-reason>Le timeout par defaut etait calibre sur une machine locale, pas sur un runner CI charge.</cal-reason>
+  <cal-fact>Des tests d integration echouaient aleatoirement sur le CI partage, jamais en local.</cal-fact>
+  <cal-rule>Ne jamais copier un timeout local tel quel dans la config CI.</cal-rule>
+  <cal-link>pieges/duplicate-webhook-delivery</cal-link>
+  <p>Doubler le timeout en CI a suffi a stabiliser la suite sans changer le code teste.</p>
+</cal-topic>

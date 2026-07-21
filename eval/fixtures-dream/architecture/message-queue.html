@@ -1,0 +1,8 @@
+<cal-topic title="Diffusion des messages via file d attente" keywords="message, queue, broadcast, diffusion, pubsub" created="2026-02-10" updated="2026-02-10">
+  <cal-decision>Chaque instance serveur publie sur une file partagee, tous les abonnes recoivent le message.</cal-decision>
+  <cal-reason>Plusieurs instances serveur doivent voir le meme message pour les clients connectes a des noeuds differents.</cal-reason>
+  <cal-fact>La file utilise un pattern pub/sub avec un canal par conversation.</cal-fact>
+  <cal-rule>Toujours accuser reception avant de retirer un message de la file.</cal-rule>
+  <cal-file>src/queue/broadcaster.ts</cal-file>
+  <p>Ce mecanisme permet a un client connecte sur n importe quel noeud de recevoir les messages diffuses par un autre noeud.</p>
+</cal-topic>

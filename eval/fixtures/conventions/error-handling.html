@@ -1,0 +1,8 @@
+<cal-topic title="Error handling pattern" keywords="error, handling, exception, pattern, wrapping" created="2026-03-07" updated="2026-03-07">
+  <cal-decision>All errors crossing a module boundary are wrapped in a typed AppError.</cal-decision>
+  <cal-reason>Raw exceptions from third-party libraries leaked implementation details into API responses.</cal-reason>
+  <cal-fact>AppError carries a stable error code used by the frontend for translated messages.</cal-fact>
+  <cal-rule>Never let a raw driver exception reach the HTTP response layer.</cal-rule>
+  <cal-file>src/errors/app-error.ts</cal-file>
+  <p>Wrapping happens at the boundary, not deep inside business logic, to keep stack traces useful.</p>
+</cal-topic>

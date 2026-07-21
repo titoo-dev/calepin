@@ -1,0 +1,8 @@
+<cal-topic title="Pipeline de deploiement Docker" keywords="docker, deployment, cicd, pipeline, build" created="2026-03-12" updated="2026-03-12">
+  <cal-decision>Chaque merge sur main construit une image Docker taguee avec le SHA du commit.</cal-decision>
+  <cal-reason>Le tag par SHA rend un rollback aussi simple qu une commande de deploy, sans rebuild.</cal-reason>
+  <cal-fact>Le pipeline lance les tests dans la meme image avant de la pousser sur le registre.</cal-fact>
+  <cal-rule>Ne jamais deployer une image qui n a pas passe l etape de tests en CI.</cal-rule>
+  <cal-file>.github/workflows/deploy.yml</cal-file>
+  <p>Staging et production tirent exactement la meme image ; seul le tag promu differe entre environnements.</p>
+</cal-topic>

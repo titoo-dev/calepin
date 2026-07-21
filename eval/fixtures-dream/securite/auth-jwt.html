@@ -1,0 +1,8 @@
+<cal-topic title="Rotation des tokens JWT" keywords="jwt, auth, token, rotation, refresh" created="2026-03-11" updated="2026-03-11">
+  <cal-decision>Le refresh token est a usage unique, remplace a chaque utilisation.</cal-decision>
+  <cal-reason>Un refresh token vole et reutilise plusieurs fois doit pouvoir etre detecte.</cal-reason>
+  <cal-fact>La reutilisation d un refresh token deja consomme revoque toute la famille de tokens.</cal-fact>
+  <cal-rule>Ne jamais renvoyer le meme refresh token deux fois.</cal-rule>
+  <cal-file>src/auth/token-service.ts</cal-file>
+  <p>Cette detection de reutilisation attrape le vol de token meme sans savoir comment il a fuite.</p>
+</cal-topic>

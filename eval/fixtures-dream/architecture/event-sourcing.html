@@ -1,0 +1,7 @@
+<cal-topic title="Journal d evenements pour l historique des conversations" keywords="event-sourcing, journal, historique, replay" created="2026-02-17" updated="2026-02-17">
+  <cal-decision>Chaque changement d etat de conversation est ecrit comme un evenement immuable.</cal-decision>
+  <cal-fact>L etat courant se reconstruit par replay des evenements depuis un snapshot.</cal-fact>
+  <cal-rule>Ne jamais muter un evenement deja ecrit, seulement en ajouter de nouveaux.</cal-rule>
+  <cal-link>architecture/api-gateway</cal-link>
+  <p>Ce journal sert aussi de source de verite pour la reconciliation apres panne.</p>
+</cal-topic>

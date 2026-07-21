@@ -1,0 +1,6 @@
+<cal-topic title="Configuration DNS multi-environnements" keywords="dns, domaines, configuration, environnements" created="2026-03-17" updated="2026-03-17">
+  <cal-decision>Chaque environnement (staging, prod) a sa propre zone DNS sous un sous-domaine dedie.</cal-decision>
+  <cal-fact>Le TTL est abaisse avant toute bascule planifiee.</cal-fact>
+  <cal-link>infra/secrets-management</cal-link>
+  <p>Cette separation de zones evite les collisions de noms entre environnements.</p>
+</cal-topic>

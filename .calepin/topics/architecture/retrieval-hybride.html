@@ -1,0 +1,7 @@
+<cal-topic title="Retrieval hybride : BM25 + embeddings multilingues locaux" keywords="retrieval, recherche, search, bm25, embeddings, ranking, score, multilingue" created="2026-07-21" updated="2026-07-21">
+  <cal-decision>Ranking fusionné BM25 (exact-match) + cosinus d'embeddings multilingues locaux dès la v1 (P2).</cal-decision>
+  <cal-reason>Mémoire bilingue fr/en : le lexical pur ne fait ni synonymie ni cross-langue.</cal-reason>
+  <cal-fact>SHOULD_CITE_MIN = 1.5, à calibrer en P2 sur le jeu de 20 questions.</cal-fact>
+  <cal-rule>Fallback BM25 seul si le modèle est absent — dégradé, jamais bloquant.</cal-rule>
+  <cal-file>lib/search.mjs</cal-file>
+</cal-topic>

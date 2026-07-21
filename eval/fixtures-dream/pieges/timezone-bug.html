@@ -1,0 +1,7 @@
+<cal-topic title="Bug de fuseau horaire dans les timestamps de messages" keywords="timezone, bug, timestamp, utc, dst" created="2026-03-09" updated="2026-03-09">
+  <cal-reason>Les transitions d heure d ete faisaient apparaitre les messages dans le desordre.</cal-reason>
+  <cal-fact>Les timestamps etaient stockes en heure serveur locale au lieu de UTC pendant trois mois.</cal-fact>
+  <cal-rule>Toujours stocker les timestamps en UTC, convertir en local seulement a l affichage.</cal-rule>
+  <cal-file>src/models/message.ts</cal-file>
+  <p>Une migration batch a corrige les lignes affectees une fois l offset par ligne deduit des logs serveur.</p>
+</cal-topic>

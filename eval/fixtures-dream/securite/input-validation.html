@@ -1,0 +1,6 @@
+<cal-topic title="Validation des entrees utilisateur" keywords="validation, entrees, securite, schema" created="2026-03-22" updated="2026-03-22">
+  <cal-decision>Chaque endpoint valide son payload contre un schema avant tout traitement.</cal-decision>
+  <cal-fact>Un payload invalide renvoie systematiquement une erreur 400 detaillee.</cal-fact>
+  <cal-link>securite/secrets-rotation</cal-link>
+  <p>Cette validation systematique a elimine toute une classe de bugs d injection en amont.</p>
+</cal-topic>

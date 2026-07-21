@@ -1,0 +1,9 @@
+<cal-topic title="Sharding Postgres par workspace" keywords="sharding, postgres, workspace, partition, scaling" created="2026-03-04" updated="2026-03-04">
+  <cal-decision>Les donnees sont partitionnees par workspace_id sur plusieurs instances Postgres.</cal-decision>
+  <cal-reason>Un gros workspace faisait deriver les statistiques du planificateur de requetes pour les autres workspaces.</cal-reason>
+  <cal-fact>Le routage de shard se calcule via un hash de workspace_id modulo le nombre de shards.</cal-fact>
+  <cal-fact>Les jointures cross-shard ne sont pas supportees ; l agregation se fait cote application.</cal-fact>
+  <cal-rule>Ne jamais lancer une migration sans mettre a jour la config du routeur de shard.</cal-rule>
+  <cal-file>src/db/shard-router.ts</cal-file>
+  <p>Ajouter un shard demande un rebalancement hors-ligne ; pas de resharding en ligne pour l instant.</p>
+</cal-topic>

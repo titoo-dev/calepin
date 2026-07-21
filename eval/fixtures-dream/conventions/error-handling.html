@@ -1,0 +1,7 @@
+<cal-topic title="Enveloppement des exceptions avant reponse API" keywords="erreurs, exceptions, api, error-handling" created="2026-03-08" updated="2026-03-08">
+  <cal-decision>Toute exception non geree est enveloppee dans un objet {code, message} avant la reponse HTTP.</cal-decision>
+  <cal-reason>Les stacktraces brutes fuitaient des chemins internes vers le client.</cal-reason>
+  <cal-rule>Ne jamais renvoyer une stacktrace brute au client, meme en dev.</cal-rule>
+  <cal-file>src/middleware/error-handler.ts</cal-file>
+  <p>Ce middleware centralise aussi le logging cote serveur pour chaque erreur capturee.</p>
+</cal-topic>

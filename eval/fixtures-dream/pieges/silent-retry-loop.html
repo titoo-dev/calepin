@@ -1,0 +1,7 @@
+<cal-topic title="Boucle de retry silencieuse masquant une panne" keywords="retry, boucle, panne, silencieux" created="2026-03-14" updated="2026-03-14">
+  <cal-reason>Le catch autour du retry avalait l erreur sans la propager au monitoring.</cal-reason>
+  <cal-fact>Un service retentait indefiniment sans jamais logger l echec sous-jacent.</cal-fact>
+  <cal-rule>Toujours logger l erreur avant de retenter, meme si le retry reussit ensuite.</cal-rule>
+  <cal-link>pieges/unbounded-queue-growth</cal-link>
+  <p>La panne n a ete visible qu au moment ou la file sous-jacente a fini par deborder.</p>
+</cal-topic>

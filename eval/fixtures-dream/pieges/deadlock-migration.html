@@ -1,0 +1,7 @@
+<cal-topic title="Deadlock pendant une migration en ligne" keywords="deadlock, migration, postgres, lock" created="2026-03-13" updated="2026-03-13">
+  <cal-reason>L index avait ete cree sans CONCURRENTLY.</cal-reason>
+  <cal-fact>Une migration ajoutant un index avait bloque des ecritures concurrentes pendant plusieurs minutes.</cal-fact>
+  <cal-rule>Toujours creer un index en production avec CREATE INDEX CONCURRENTLY.</cal-rule>
+  <cal-link>pieges/race-condition-cache</cal-link>
+  <p>Le rollback a ete plus rapide que d attendre la fin de la migration bloquante.</p>
+</cal-topic>

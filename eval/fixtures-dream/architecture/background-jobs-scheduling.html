@@ -1,0 +1,7 @@
+<cal-topic title="Planification des jobs recurrents" keywords="jobs, scheduling, cron, recurrent" created="2026-02-21" updated="2026-02-21">
+  <cal-decision>Les jobs recurrents (nettoyage, rapports) sont declenches par un planificateur cron interne.</cal-decision>
+  <cal-fact>Un seul noeud a la fois execute un job planifie grace a un verrou distribue.</cal-fact>
+  <cal-rule>Toujours logger le debut et la fin d un job planifie.</cal-rule>
+  <cal-link>architecture/background-jobs</cal-link>
+  <p>Le verrou distribue evite les executions concurrentes du meme job sur plusieurs noeuds.</p>
+</cal-topic>

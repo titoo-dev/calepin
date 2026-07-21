@@ -1,0 +1,9 @@
+<cal-topic title="Passerelle WebSocket — gestion des connexions" keywords="websocket, connexion, passerelle, gateway, reconnexion, backoff" created="2026-02-01" updated="2026-02-01">
+  <cal-decision>Reconnexion automatique avec backoff exponentiel (200ms a 30s max).</cal-decision>
+  <cal-reason>Les clients mobiles perdent frequemment le reseau (changement wifi/4G).</cal-reason>
+  <cal-fact>Chaque connexion websocket a un identifiant de session unique.</cal-fact>
+  <cal-fact>Le serveur envoie un ping toutes les 30 secondes pour detecter les connexions mortes.</cal-fact>
+  <cal-rule>Ne jamais garder un socket ouvert sans heartbeat actif.</cal-rule>
+  <cal-file>src/gateway/socket-manager.ts</cal-file>
+  <p>Quand la connexion tombe, le client retente avec un delai croissant jusqu a retablissement, sans perdre les messages en attente grace a une file locale.</p>
+</cal-topic>

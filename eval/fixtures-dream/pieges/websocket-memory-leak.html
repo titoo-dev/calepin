@@ -1,0 +1,7 @@
+<cal-topic title="Fuite memoire sur les listeners websocket" keywords="websocket, fuite, memoire, leak, listeners" created="2026-03-10" updated="2026-03-10">
+  <cal-reason>Chaque navigation dans l app ajoutait un nouveau listener sans retirer l ancien.</cal-reason>
+  <cal-fact>Les listeners de reconnexion n etaient jamais retires a la fermeture du composant.</cal-fact>
+  <cal-rule>Toujours retirer les listeners websocket dans le cleanup du composant.</cal-rule>
+  <cal-file>src/hooks/use-socket.ts</cal-file>
+  <p>Le leak n apparaissait qu apres plusieurs dizaines de navigations, difficile a reproduire en local.</p>
+</cal-topic>

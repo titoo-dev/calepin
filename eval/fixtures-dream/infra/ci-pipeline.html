@@ -1,0 +1,8 @@
+<cal-topic title="Etapes du pipeline d integration continue" keywords="ci, pipeline, build, tests, lint" created="2026-03-13" updated="2026-03-13">
+  <cal-decision>Le pipeline CI enchaine lint, tests unitaires puis build de l image dans cet ordre.</cal-decision>
+  <cal-reason>Echouer vite sur le lint evite de gaspiller du temps de build sur du code qui ne passera pas la revue.</cal-reason>
+  <cal-fact>Chaque etape peut etre relancee independamment depuis l interface CI.</cal-fact>
+  <cal-rule>Ne jamais sauter l etape de lint, meme pour un hotfix urgent.</cal-rule>
+  <cal-file>.github/workflows/ci.yml</cal-file>
+  <p>Ce pipeline alimente directement le pipeline de deploiement Docker en cas de succes.</p>
+</cal-topic>

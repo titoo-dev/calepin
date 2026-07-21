@@ -1,0 +1,7 @@
+<cal-topic title="Piège — requêtes N+1 sur la liste des conversations" keywords="requetes, n+1, orm, performance, conversations" created="2026-03-10" updated="2026-03-10">
+  <cal-fact>Charger 50 conversations déclenchait 50 requêtes supplémentaires pour le dernier message de chacune.</cal-fact>
+  <cal-reason>L'ORM charge les relations à la demande par défaut, sans eager loading explicite.</cal-reason>
+  <cal-rule>Toujours précharger explicitement les relations utilisées dans une liste.</cal-rule>
+  <cal-file>src/repositories/conversation-repository.ts</cal-file>
+  <p>Le correctif a réduit le temps de chargement de la liste de 1.2s à 80ms sur un compte à 50 conversations.</p>
+</cal-topic>

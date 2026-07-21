@@ -1,0 +1,6 @@
+<cal-topic title="Format des logs applicatifs" keywords="logs, logging, format, json" created="2026-03-12" updated="2026-03-12">
+  <cal-decision>Tous les logs applicatifs sont emis en JSON structure sur stdout.</cal-decision>
+  <cal-fact>Chaque ligne de log porte un request_id pour correler les traces.</cal-fact>
+  <cal-link>conventions/testing-strategy</cal-link>
+  <p>Le format JSON permet l ingestion directe par l outil d observabilite sans parsing fragile.</p>
+</cal-topic>

@@ -1,0 +1,6 @@
+<cal-topic title="Protection CSRF sur les endpoints mutants" keywords="csrf, securite, token, protection" created="2026-03-20" updated="2026-03-20">
+  <cal-decision>Chaque requete mutante (POST/PUT/DELETE) exige un token CSRF valide.</cal-decision>
+  <cal-fact>Le token CSRF est lie a la session et expire avec elle.</cal-fact>
+  <cal-link>securite/rate-limit-abuse</cal-link>
+  <p>Cette protection couvre les clients web classiques ; les clients API purs utilisent un autre mecanisme.</p>
+</cal-topic>

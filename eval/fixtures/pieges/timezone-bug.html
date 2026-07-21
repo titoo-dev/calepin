@@ -1,0 +1,7 @@
+<cal-topic title="Timezone bug in message timestamps" keywords="timezone, bug, timestamp, utc, dst" created="2026-03-09" updated="2026-03-09">
+  <cal-fact>Timestamps were stored in local server time instead of UTC for the first three months.</cal-fact>
+  <cal-reason>Daylight saving time transitions caused message ordering to appear to jump backward.</cal-reason>
+  <cal-rule>Always store timestamps in UTC, convert to local time only at render.</cal-rule>
+  <cal-file>src/models/message.ts</cal-file>
+  <p>A batch migration backfilled the affected rows once the offset per row could be inferred from server logs.</p>
+</cal-topic>

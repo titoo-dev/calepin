@@ -1,0 +1,21 @@
+{
+  "merge": [
+    { "paths": ["architecture/websocket-gateway", "architecture/websocket-gateway-reconnect"] },
+    { "paths": ["architecture/database-sharding", "architecture/postgres-sharding-workspace"] },
+    { "paths": ["conventions/commit-messages", "conventions/commit-message-format"] }
+  ],
+  "link": [
+    { "paths": ["architecture/message-queue", "architecture/rate-limiting"] },
+    { "paths": ["architecture/api-gateway", "conventions/api-versioning"] },
+    { "paths": ["infra/deploiement-docker", "infra/ci-pipeline"] }
+  ],
+  "prune": [
+    { "paths": ["conventions/todo-temp"] },
+    { "paths": ["infra/note-serveur-test"] },
+    { "paths": ["domaine/glossaire-vide"] },
+    { "paths": ["outils/note-rapide"] }
+  ],
+  "synthesize": [
+    { "paths": ["outils/config-eslint", "outils/config-prettier", "outils/config-commitlint"] }
+  ]
+}

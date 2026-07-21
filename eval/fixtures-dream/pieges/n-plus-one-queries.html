@@ -1,0 +1,7 @@
+<cal-topic title="Requetes N+1 au chargement des conversations" keywords="n+1, requetes, performance, orm" created="2026-03-11" updated="2026-03-11">
+  <cal-reason>L ORM chargeait la relation dernier message de maniere paresseuse par defaut.</cal-reason>
+  <cal-fact>Charger la liste des conversations declenchait une requete par conversation pour son dernier message.</cal-fact>
+  <cal-rule>Toujours precharger explicitement les relations utilisees dans une boucle.</cal-rule>
+  <cal-file>src/repositories/conversation-repository.ts</cal-file>
+  <p>Un eager-load explicite a ramene le nombre de requetes de N+1 a 2 quel que soit N.</p>
+</cal-topic>

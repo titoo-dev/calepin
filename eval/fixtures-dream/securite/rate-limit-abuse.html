@@ -1,0 +1,6 @@
+<cal-topic title="Detection d abus au-dela du rate limit" keywords="abus, rate-limit, securite, detection" created="2026-03-19" updated="2026-03-19">
+  <cal-decision>Un client qui declenche le rate limit 10 fois en une heure est temporairement mis en liste grise.</cal-decision>
+  <cal-fact>La liste grise expire automatiquement apres 24h sans nouvel abus.</cal-fact>
+  <cal-link>securite/csrf-protection</cal-link>
+  <p>Cette liste grise reduit la charge sans bannir definitivement un client legitime mal configure.</p>
+</cal-topic>

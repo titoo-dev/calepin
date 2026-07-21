@@ -1,0 +1,22 @@
+{
+  "name": "calepin",
+  "version": "0.1.0",
+  "description": "Mémoire projet durable pour agents de code — clone local-first de Byterover.",
+  "type": "module",
+  "bin": {
+    "calepin": "./calepin.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "eval": "node eval/run.mjs",
+    "eval:dream": "node eval/run-dream.mjs",
+    "bench": "node eval/bench.mjs"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@huggingface/transformers": "^4.2.0"
+  }
+}

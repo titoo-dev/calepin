@@ -1,0 +1,7 @@
+<cal-topic title="Configuration ESLint du projet" keywords="eslint, lint, config, outils" created="2026-03-24" updated="2026-03-24">
+  <cal-decision>Configuration ESLint partagee basee sur le preset recommande plus des regles maison sur les imports.</cal-decision>
+  <cal-fact>Le lint tourne en pre-commit et en CI, avec les memes regles.</cal-fact>
+  <cal-rule>Aucune regle ESLint ne peut etre desactivee inline sans commentaire justifiant pourquoi.</cal-rule>
+  <cal-file>.eslintrc.json</cal-file>
+  <p>Avoir les memes regles en pre-commit et en CI evite les surprises de dernier moment.</p>
+</cal-topic>

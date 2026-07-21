@@ -1,0 +1,8 @@
+<cal-topic title="Limitation de debit des requetes API" keywords="rate-limiting, quota, api, throttle, debit" created="2026-02-12" updated="2026-02-12">
+  <cal-decision>Chaque client est limite a 100 requetes par minute via un compteur glissant.</cal-decision>
+  <cal-reason>Un client mal configure avait sature la file de messages en boucle serree.</cal-reason>
+  <cal-fact>Le compteur est stocke en memoire par instance, pas partage entre noeuds.</cal-fact>
+  <cal-rule>Toujours renvoyer un header Retry-After quand la limite est atteinte.</cal-rule>
+  <cal-file>src/api/rate-limiter.ts</cal-file>
+  <p>Le lien avec la file de messages est direct : un client qui spamme sature aussi le pipeline de diffusion.</p>
+</cal-topic>

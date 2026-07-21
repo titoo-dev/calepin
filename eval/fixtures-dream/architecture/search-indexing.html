@@ -1,0 +1,7 @@
+<cal-topic title="Indexation pour la recherche de messages" keywords="search, indexation, recherche, elasticsearch" created="2026-02-18" updated="2026-02-18">
+  <cal-decision>Les messages sont indexes de maniere asynchrone apres ecriture en base.</cal-decision>
+  <cal-fact>Un delai de quelques secondes existe entre l ecriture et la disponibilite en recherche.</cal-fact>
+  <cal-rule>Ne jamais bloquer l ecriture du message en attendant l indexation.</cal-rule>
+  <cal-link>architecture/event-sourcing</cal-link>
+  <p>La coherence eventuelle est acceptee ici : la recherche n a pas besoin d etre temps reel.</p>
+</cal-topic>

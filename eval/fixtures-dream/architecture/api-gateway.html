@@ -1,0 +1,7 @@
+<cal-topic title="Passerelle API — routage et versionnage" keywords="api-gateway, routage, versionnage, proxy" created="2026-02-16" updated="2026-02-16">
+  <cal-decision>Toutes les routes publiques passent par une passerelle API unique.</cal-decision>
+  <cal-fact>La passerelle route par prefixe de version (/v1, /v2).</cal-fact>
+  <cal-rule>Ne jamais exposer un service interne directement sans passer par la passerelle.</cal-rule>
+  <cal-link>architecture/caching-layer</cal-link>
+  <p>La passerelle centralise aussi l authentification avant de forwarder vers les services internes.</p>
+</cal-topic>

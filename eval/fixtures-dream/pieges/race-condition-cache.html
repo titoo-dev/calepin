@@ -1,0 +1,7 @@
+<cal-topic title="Race condition sur l invalidation du cache" keywords="race-condition, cache, concurrence" created="2026-03-12" updated="2026-03-12">
+  <cal-reason>L invalidation et l ecriture n etaient pas dans la meme transaction logique.</cal-reason>
+  <cal-fact>Deux ecritures concurrentes pouvaient laisser le cache avec une valeur perimee.</cal-fact>
+  <cal-rule>Invalider le cache apres commit, jamais avant.</cal-rule>
+  <cal-link>pieges/deadlock-migration</cal-link>
+  <p>Le correctif ajoute un verrou court autour du couple ecriture-invalidation.</p>
+</cal-topic>

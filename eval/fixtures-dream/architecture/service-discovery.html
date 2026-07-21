@@ -1,0 +1,7 @@
+<cal-topic title="Decouverte de services entre instances" keywords="service-discovery, registry, instances, topologie" created="2026-02-14" updated="2026-02-14">
+  <cal-decision>Chaque instance s enregistre dans un registre partage au demarrage.</cal-decision>
+  <cal-fact>Le registre expire une entree apres 30 secondes sans heartbeat.</cal-fact>
+  <cal-rule>Toujours se desenregistrer proprement a l arret.</cal-rule>
+  <cal-link>architecture/load-balancing</cal-link>
+  <p>Le registre alimente directement le load balancer pour router vers les instances saines.</p>
+</cal-topic>

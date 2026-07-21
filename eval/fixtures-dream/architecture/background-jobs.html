@@ -1,0 +1,7 @@
+<cal-topic title="Jobs asynchrones et files de taches" keywords="jobs, async, taches, worker" created="2026-02-20" updated="2026-02-20">
+  <cal-decision>Les taches lourdes (export, notifications groupees) passent par une file de jobs dediee.</cal-decision>
+  <cal-fact>Chaque job a un nombre max de tentatives avant de finir en dead-letter.</cal-fact>
+  <cal-rule>Toujours rendre un job idempotent avant de le mettre en file.</cal-rule>
+  <cal-link>architecture/background-jobs-scheduling</cal-link>
+  <p>Cette file est separee de la diffusion temps reel pour ne pas ralentir les messages.</p>
+</cal-topic>

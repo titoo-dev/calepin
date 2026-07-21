@@ -1,0 +1,7 @@
+<cal-topic title="Croissance non bornee d une file interne" keywords="file, queue, memoire, croissance" created="2026-03-15" updated="2026-03-15">
+  <cal-reason>Le consommateur etait plus lent que le producteur sous charge.</cal-reason>
+  <cal-fact>Une file en memoire n avait pas de taille maximale, elle croissait jusqu a l OOM.</cal-fact>
+  <cal-rule>Toujours borner la taille d une file en memoire et rejeter au-dela.</cal-rule>
+  <cal-link>pieges/silent-retry-loop</cal-link>
+  <p>Une limite dure avec rejet explicite a remplace la croissance illimitee.</p>
+</cal-topic>

@@ -1,0 +1,7 @@
+<cal-topic title="Repartition de charge entre instances" keywords="load-balancing, repartition, instances, round-robin" created="2026-02-19" updated="2026-02-19">
+  <cal-decision>Repartition round-robin ponderee par charge CPU courante de chaque instance.</cal-decision>
+  <cal-fact>Les instances remontent leur charge toutes les 10 secondes au registre.</cal-fact>
+  <cal-rule>Retirer une instance du pool des le premier echec de healthcheck.</cal-rule>
+  <cal-link>architecture/search-indexing</cal-link>
+  <p>Ce mecanisme s appuie directement sur le registre de decouverte de services.</p>
+</cal-topic>

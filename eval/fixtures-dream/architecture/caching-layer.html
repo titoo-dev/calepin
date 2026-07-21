@@ -1,0 +1,7 @@
+<cal-topic title="Couche de cache applicatif" keywords="cache, redis, ttl, invalidation" created="2026-02-15" updated="2026-02-15">
+  <cal-decision>Cache Redis en aside-cache avec TTL de 5 minutes par defaut.</cal-decision>
+  <cal-fact>Les cles sont prefixees par type de ressource pour faciliter l invalidation groupee.</cal-fact>
+  <cal-rule>Invalider explicitement le cache a chaque ecriture, ne jamais compter que sur le TTL.</cal-rule>
+  <cal-link>architecture/service-discovery</cal-link>
+  <p>Le cache reduit la charge sur les shards Postgres pour les lectures frequentes.</p>
+</cal-topic>

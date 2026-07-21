@@ -1,0 +1,7 @@
+<cal-topic title="Erreur off-by-one dans la pagination des messages" keywords="pagination, off-by-one, bug" created="2026-03-18" updated="2026-03-18">
+  <cal-reason>Le calcul d offset utilisait la taille de page sans soustraire 1.</cal-reason>
+  <cal-fact>La derniere page omettait systematiquement un message.</cal-fact>
+  <cal-rule>Toujours tester la pagination sur un nombre d elements non multiple de la taille de page.</cal-rule>
+  <cal-link>pieges/n-plus-one-queries</cal-link>
+  <p>Un test parametre sur plusieurs tailles de jeu de donnees a rendu la regression impossible a rater.</p>
+</cal-topic>

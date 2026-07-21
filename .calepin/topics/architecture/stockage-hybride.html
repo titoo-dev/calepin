@@ -1,0 +1,7 @@
+<cal-topic title="Stockage hybride : perso hors repo, équipe dans le repo" keywords="stockage, storage, espace, space, equipe, team, perso, personal, hybride" created="2026-07-21" updated="2026-07-21">
+  <cal-decision>Espace perso sous ~/.calepin/, espace équipe dans &lt;repo&gt;/.calepin/ — versionné et permissionné par le repo.</cal-decision>
+  <cal-reason>Chaque sorte d'espace prend le mécanisme de partage qui lui coûte le moins : le perso reste local, l'équipe hérite du repo (sync, historique, PR).</cal-reason>
+  <cal-rule>Query fusionne tous les espaces actifs ; Record cible l'équipe par défaut quand elle existe.</cal-rule>
+  <cal-file>lib/store.mjs</cal-file>
+  <cal-link>architecture/format-cal</cal-link>
+</cal-topic>

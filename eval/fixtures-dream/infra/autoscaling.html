@@ -1,0 +1,6 @@
+<cal-topic title="Autoscaling des instances applicatives" keywords="autoscaling, scaling, instances, charge" created="2026-03-18" updated="2026-03-18">
+  <cal-decision>Le nombre d instances s ajuste sur la charge CPU moyenne sur 5 minutes.</cal-decision>
+  <cal-fact>Un plancher de 2 instances est garde meme a charge nulle pour la disponibilite.</cal-fact>
+  <cal-link>infra/ci-pipeline</cal-link>
+  <p>Le plancher a 2 instances evite un cold-start complet lors d un pic soudain de trafic.</p>
+</cal-topic>

@@ -1,0 +1,7 @@
+<cal-topic title="Livraison en double des webhooks sortants" keywords="webhook, duplication, idempotence" created="2026-03-17" updated="2026-03-17">
+  <cal-reason>Le retry sur timeout ne verifiait pas si la premiere tentative avait fini par aboutir.</cal-reason>
+  <cal-fact>Un webhook pouvait etre livre deux fois si le consommateur repondait lentement.</cal-fact>
+  <cal-rule>Toujours inclure un identifiant d evenement idempotent dans chaque webhook.</cal-rule>
+  <cal-link>pieges/flaky-test-timeout</cal-link>
+  <p>Le consommateur peut desormais deduplique par identifiant plutot que de subir la double livraison.</p>
+</cal-topic>

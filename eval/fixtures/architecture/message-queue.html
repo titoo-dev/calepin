@@ -1,0 +1,9 @@
+<cal-topic title="Message broadcast via Redis pub/sub" keywords="redis, pubsub, broadcast, queue, fanout" created="2026-03-02" updated="2026-03-02">
+  <cal-decision>All chat messages are published to a Redis channel per conversation.</cal-decision>
+  <cal-reason>Multiple server instances need to fan out messages to all connected clients without sharing process memory.</cal-reason>
+  <cal-fact>Each app server subscribes to conversation channels lazily, on first client join.</cal-fact>
+  <cal-fact>Message ordering is guaranteed per channel, not globally.</cal-fact>
+  <cal-rule>Never block the event loop waiting on a publish acknowledgment.</cal-rule>
+  <cal-file>src/queue/broadcaster.ts</cal-file>
+  <p>This keeps servers stateless: any instance can handle any client, since messages flow through Redis rather than in-process memory.</p>
+</cal-topic>

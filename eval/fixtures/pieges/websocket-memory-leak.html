@@ -1,0 +1,7 @@
+<cal-topic title="Piège — fuite mémoire des listeners websocket" keywords="fuite, memoire, websocket, listener, leak" created="2026-03-08" updated="2026-03-08">
+  <cal-fact>Un listener non retiré à la déconnexion continue de référencer l'objet socket entier.</cal-fact>
+  <cal-reason>Découvert en 2026-05 : la mémoire du serveur montait de 200Mo/heure sous charge.</cal-reason>
+  <cal-rule>Toujours retirer les listeners dans le handler de déconnexion, jamais seulement à la fermeture propre.</cal-rule>
+  <cal-file>src/gateway/socket-manager.ts</cal-file>
+  <p>Le profiler mémoire a montré des milliers d'objets socket fermés mais jamais collectés, tous retenus par un listener oublié.</p>
+</cal-topic>
