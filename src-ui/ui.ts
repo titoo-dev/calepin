@@ -22,6 +22,12 @@ export function banner(): string {
   return '\n' + pc.bold(pc.cyan('calepin')) + pc.dim(' — mémoire projet durable pour agents de code') + '\n';
 }
 
+/** Résumé des espaces actifs pour l'en-tête du menu principal. */
+export function spacesSummary(spaces: { label: string; topics: number }[]): string {
+  if (spaces.length === 0) return pc.dim('aucun espace actif — voir "Espaces" dans le menu');
+  return spaces.map((s) => `${pc.cyan(s.label)} ${pc.dim(`(${s.topics} sujet${s.topics > 1 ? 's' : ''})`)}`).join(' · ');
+}
+
 /**
  * Copie `text` dans le presse-papier via OSC52 (fonctionne dans la plupart
  * des terminaux modernes, y compris via SSH/tmux). On ne peut pas détecter
