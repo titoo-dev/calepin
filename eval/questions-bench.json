@@ -28,5 +28,28 @@
   { "query": "cache invalidation stale redis ttl ecriture", "expected": "architecture/caching-layer" },
   { "query": "csrf token endpoint POST protection mutant", "expected": "securite/csrf-protection" },
   { "query": "pagination bug dernier message manquant offset", "expected": "pieges/off-by-one-pagination" },
-  { "query": "queue grows unbounded memory OOM consumer lent producteur", "expected": "pieges/unbounded-queue-growth" }
+  { "query": "queue grows unbounded memory OOM consumer lent producteur", "expected": "pieges/unbounded-queue-growth" },
+
+  { "query": "Comment active-t-on une nouvelle fonctionnalite progressivement sans redeployer tout le monde d un coup ?", "expected": "architecture/feature-flags" },
+  { "query": "Que se passe-t-il quand le fournisseur de facturation externe repond trop lentement plusieurs fois de suite ?", "expected": "architecture/circuit-breaker" },
+  { "query": "Comment eviter qu un client ne soit facture deux fois s il relance sa requete apres un timeout ?", "expected": "architecture/idempotency-keys" },
+  { "query": "Pourquoi un utilisateur peut-il voir une ancienne version de son profil juste apres l avoir modifie ?", "expected": "architecture/read-replica-lag" },
+  { "query": "Comment garantir qu un evenement n est publie que si l ecriture en base a bien ete validee ?", "expected": "architecture/outbox-pattern" },
+  { "query": "Pendant combien de temps un lien d invitation vers un espace de travail reste-t-il valide ?", "expected": "domaine/workspace-invite-flow" },
+  { "query": "Quelle est la limite d historique des messages conservee sur le plan gratuit ?", "expected": "domaine/subscription-tiers" },
+  { "query": "Comment bascule-t-on le trafic de production sans interruption lors d un deploiement ?", "expected": "infra/blue-green-deployment" },
+  { "query": "Pourquoi toutes les requetes frappent-elles la base en meme temps quand un lot de cles expire ensemble ?", "expected": "pieges/thundering-herd" },
+  { "query": "Qu est-ce qui empeche un developpeur de committer accidentellement une cle API en clair ?", "expected": "securite/secret-scanning" },
+
+  { "query": "What could go wrong if a migration locks a table while it's still handling writes?", "expected": "pieges/deadlock-migration" },
+  { "query": "How does the number of running instances adjust automatically to traffic?", "expected": "infra/autoscaling" },
+  { "query": "What's the policy for keeping third-party packages up to date?", "expected": "conventions/dependency-updates" },
+  { "query": "What rule prevents a request from firing a separate database query per item in a list?", "expected": "pieges/n-plus-one-queries" },
+  { "query": "Who is allowed to permanently delete a workspace?", "expected": "domaine/roles-permissions" },
+
+  { "query": "What sections does a pull request description have to include before review can start?", "expected": "conventions/pr-template" },
+  { "query": "How long are static asset files cached at the CDN layer?", "expected": "infra/cdn-configuration" },
+  { "query": "Which compiler option catches undefined access on array indexing at build time?", "expected": "outils/config-typescript" },
+  { "query": "Why did database connections run out under production load even though staging looked fine?", "expected": "pieges/connection-pool-exhaustion" },
+  { "query": "Which three things get checked first when responding to a severity-1 incident?", "expected": "infra/incident-response-runbook" }
 ]

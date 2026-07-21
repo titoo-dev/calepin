@@ -1,0 +1,7 @@
+<cal-topic title="Incident response runbook" keywords="incident, runbook, oncall, escalation" created="2026-03-15" updated="2026-03-15">
+  <cal-decision>A severity-1 incident pages the on-call engineer and their backup simultaneously.</cal-decision>
+  <cal-fact>The runbook lists the first three checks: recent deploys, error rate dashboard, upstream provider status.</cal-fact>
+  <cal-rule>Never wait more than 15 minutes to escalate an unacknowledged page.</cal-rule>
+  <cal-link>infra/monitoring-alerting</cal-link>
+  <p>Following the same first-three-checks order every time cuts the average time to first mitigation.</p>
+</cal-topic>

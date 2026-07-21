@@ -1,0 +1,6 @@
+<cal-topic title="Vitest configuration for the project" keywords="vitest, testing, config, coverage" created="2026-03-21" updated="2026-03-21">
+  <cal-decision>Vitest runs with a shared setup file that mocks the clock and the network by default.</cal-decision>
+  <cal-fact>Coverage thresholds are enforced per package, not just globally.</cal-fact>
+  <cal-link>conventions/testing-strategy</cal-link>
+  <p>Mocking the clock by default caught several tests that only passed near midnight UTC.</p>
+</cal-topic>

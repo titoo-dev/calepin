@@ -1,0 +1,6 @@
+<cal-topic title="CDN configuration for static assets" keywords="cdn, cache, static, assets" created="2026-03-13" updated="2026-03-13">
+  <cal-decision>Static assets are served through a CDN with a one-year cache header and a content hash in the filename.</cal-decision>
+  <cal-fact>HTML responses are never cached at the CDN layer, only fingerprinted assets.</cal-fact>
+  <cal-link>infra/dns-configuration</cal-link>
+  <p>The content hash in the filename means a cache purge is rarely needed; a new deploy just ships new filenames.</p>
+</cal-topic>

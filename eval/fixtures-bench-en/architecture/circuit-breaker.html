@@ -1,0 +1,8 @@
+<cal-topic title="Circuit breaker around downstream calls" keywords="circuit-breaker, resilience, downstream, timeout" created="2026-02-21" updated="2026-02-21">
+  <cal-decision>Every call to the billing provider goes through a circuit breaker that opens after five consecutive failures.</cal-decision>
+  <cal-reason>A slow billing provider was holding connections open and starving the request pool for unrelated endpoints.</cal-reason>
+  <cal-fact>While open, the breaker returns a cached response instead of blocking.</cal-fact>
+  <cal-rule>Never call an external provider directly without going through the breaker wrapper.</cal-rule>
+  <cal-file>src/resilience/circuit-breaker.ts</cal-file>
+  <p>The half-open state allows one probe request every 30 seconds before fully closing again.</p>
+</cal-topic>

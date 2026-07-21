@@ -1,0 +1,7 @@
+<cal-topic title="Log retention policy" keywords="logs, retention, storage, compliance" created="2026-03-14" updated="2026-03-14">
+  <cal-decision>Application logs are retained for 30 days, audit logs for one year.</cal-decision>
+  <cal-reason>A compliance request needed access-log history that had already been deleted under the old 7-day retention.</cal-reason>
+  <cal-fact>Retention is enforced by the log storage backend, not by application code.</cal-fact>
+  <cal-link>conventions/logging-format</cal-link>
+  <p>The longer audit log retention was the direct fix for the compliance gap that triggered this policy change.</p>
+</cal-topic>

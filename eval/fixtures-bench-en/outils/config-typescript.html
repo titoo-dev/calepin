@@ -1,0 +1,6 @@
+<cal-topic title="TypeScript compiler configuration" keywords="typescript, tsconfig, strict, compiler" created="2026-03-20" updated="2026-03-20">
+  <cal-decision>strict mode is enabled project-wide, including noUncheckedIndexedAccess.</cal-decision>
+  <cal-fact>New packages inherit the root tsconfig and cannot loosen strictness locally.</cal-fact>
+  <cal-file>tsconfig.json</cal-file>
+  <p>noUncheckedIndexedAccess catches a whole class of undefined-array-access bugs at compile time.</p>
+</cal-topic>

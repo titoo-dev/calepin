@@ -1,0 +1,8 @@
+<cal-topic title="Feature flag rollout system" keywords="feature-flags, rollout, toggle, release" created="2026-02-20" updated="2026-02-20">
+  <cal-decision>New features ship behind a feature flag evaluated per workspace, not per user.</cal-decision>
+  <cal-reason>A previous global rollout took down search indexing for every workspace at once.</cal-reason>
+  <cal-fact>Flags default to off and are enabled gradually by percentage of workspaces.</cal-fact>
+  <cal-rule>Never remove a flag until the rollout has been at 100% for at least two weeks.</cal-rule>
+  <cal-file>src/flags/evaluator.ts</cal-file>
+  <p>A flag can be killed instantly without a redeploy if a rollout misbehaves.</p>
+</cal-topic>

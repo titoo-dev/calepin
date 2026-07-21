@@ -16,28 +16,86 @@ import { getEmbedder, embedTopics, getEmbedderFailureReason } from '../lib/embed
 
 const REPO_ROOT = path.join(import.meta.dirname, '..');
 const FIXTURES_DIR = path.join(import.meta.dirname, 'fixtures-dream');
+const FIXTURES_DIR_EN = path.join(import.meta.dirname, 'fixtures-bench-en');
 const QUESTIONS_FILE = path.join(import.meta.dirname, 'questions-bench.json');
 const OUT_FILE = path.join(REPO_ROOT, 'BENCHMARK.md');
 const METRIC_LIMIT = 5; // assez pour recall@1, recall@3 et MRR@5
-const COLD_SAMPLES_INDICATIF = 5; // bm25/grep : spawn froid indicatif, pas les 30
+const COLD_SAMPLES_INDICATIF = 5; // bm25/grep : spawn froid indicatif, pas toutes les questions
+// Seul sujet du corpus fixtures-dream/ (majoritairement français) réellement
+// rédigé en anglais — voir BENCHMARK.md Corpus. Sert à classer le bucket
+// fr/en des questions qui le ciblent.
+const DREAM_EN_EXCEPTIONS = new Set(['architecture/database-sharding']);
 
-function loadFixtures() {
+function loadFixtures(dir, source) {
   const topics = [];
-  const walk = (dir, prefix) => {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      const full = path.join(dir, entry.name);
+  const walk = (d, prefix) => {
+    for (const entry of fs.readdirSync(d, { withFileTypes: true })) {
+      const full = path.join(d, entry.name);
       if (entry.isDirectory()) {
         walk(full, prefix ? `${prefix}/${entry.name}` : entry.name);
       } else if (entry.name.endsWith('.html')) {
         const slug = entry.name.slice(0, -'.html'.length);
         const topicPath = prefix ? `${prefix}/${slug}` : slug;
         const raw = fs.readFileSync(full, 'utf8');
-        topics.push({ space: 'eval', path: topicPath, obj: parseTopic(raw), raw });
+        topics.push({ space: 'eval', path: topicPath, obj: parseTopic(raw), raw, source });
       }
     }
   };
-  walk(FIXTURES_DIR, '');
+  walk(dir, '');
   return topics;
+}
+
+// --- Bucket linguistique (fr→fr, en→fr, fr→en, en→en, fourre-tout) ---------
+// Détection légère par mots-outils : suffisant pour classer les questions du
+// bench (pas un détecteur de langue général). Query sans marqueur net des
+// deux côtés (keyword-soup volontaire) → "fourre-tout", assumé.
+
+const FR_MARKERS = new Set([
+  'comment', 'quelle', 'quel', 'quelles', 'quels', 'pourquoi', 'combien', 'est-ce',
+  'qu', 'que', 'qui', 'les', 'des', 'une', 'un', 'sont', 'peut', 'sans', 'entre',
+  'avant', 'apres', 'après', 'toujours', 'jamais', 'pendant', 'ete', 'reste',
+]);
+const EN_MARKERS = new Set([
+  'how', 'what', 'why', 'who', 'which', 'when', 'where', 'does', 'do', 'the',
+  'a', 'an', 'under', 'in', 'is', 'are', 'can', 'you',
+]);
+
+function detectQueryLang(query) {
+  const words = query.toLowerCase().match(/[a-zàâäéèêëïîôöùûüç]+/g) ?? [];
+  let fr = 0;
+  let en = 0;
+  for (const w of words) {
+    if (FR_MARKERS.has(w)) fr++;
+    if (EN_MARKERS.has(w)) en++;
+  }
+  if (fr > 0 && en === 0) return 'fr';
+  if (en > 0 && fr === 0) return 'en';
+  return null;
+}
+
+function topicLang(topicPath, pathSourceMap) {
+  const source = pathSourceMap.get(topicPath);
+  if (source === 'bench-en') return 'en';
+  if (DREAM_EN_EXCEPTIONS.has(topicPath)) return 'en';
+  return 'fr';
+}
+
+function bucketOf(question, pathSourceMap) {
+  const qLang = detectQueryLang(question.query);
+  if (!qLang) return 'fourre-tout';
+  return `${qLang}→${topicLang(question.expected, pathSourceMap)}`;
+}
+
+const BUCKET_ORDER = ['fr→fr', 'en→fr', 'fr→en', 'en→en', 'fourre-tout'];
+
+function groupIndicesByBucket(questions, pathSourceMap) {
+  const groups = new Map(BUCKET_ORDER.map((b) => [b, []]));
+  questions.forEach((q, i) => {
+    const b = bucketOf(q, pathSourceMap);
+    if (!groups.has(b)) groups.set(b, []);
+    groups.get(b).push(i);
+  });
+  return groups;
 }
 
 // --- Système 1 : baseline-grep --------------------------------------------
@@ -123,6 +181,7 @@ function makeTempCorpus() {
     recursive: true,
     filter: (src) => !src.endsWith('attendus.json'),
   });
+  fs.cpSync(FIXTURES_DIR_EN, topicsDir, { recursive: true });
   return tmp;
 }
 
@@ -157,7 +216,8 @@ function fmtMs(x) {
 }
 
 async function main() {
-  const topics = loadFixtures();
+  const topics = [...loadFixtures(FIXTURES_DIR, 'dream'), ...loadFixtures(FIXTURES_DIR_EN, 'bench-en')];
+  const pathSourceMap = new Map(topics.map((t) => [t.path, t.source]));
   const questions = JSON.parse(fs.readFileSync(QUESTIONS_FILE, 'utf8'));
   console.log(`calepin bench: ${topics.length} sujets, ${questions.length} questions\n`);
 
@@ -185,7 +245,7 @@ async function main() {
     console.error(`embedder indisponible (${getEmbedderFailureReason() ?? 'raison inconnue'}) — bench hybrid impossible.`);
     process.exit(1);
   }
-  console.log('embedder chargé, embedding des 60 sujets (cache réutilisé si présent)...');
+  console.log(`embedder chargé, embedding des ${topics.length} sujets (cache réutilisé si présent)...`);
   const topicVectors = await embedTopics(topics, embedder);
 
   const hybridWarmLatencies = [];
@@ -199,6 +259,23 @@ async function main() {
     hybridHits.push(result);
   }
   const hybridMetrics = computeMetrics(questions, hybridHits);
+
+  // --- Breakdown par bucket linguistique (fr→fr, en→fr, fr→en, en→en, ...) --
+  const bucketGroups = groupIndicesByBucket(questions, pathSourceMap);
+  const bucketRows = [];
+  for (const bucket of BUCKET_ORDER) {
+    const idx = bucketGroups.get(bucket) ?? [];
+    if (idx.length === 0) continue;
+    const sub = (hits) => idx.map((i) => hits[i]);
+    const subQ = idx.map((i) => questions[i]);
+    bucketRows.push({
+      bucket,
+      n: idx.length,
+      grep: computeMetrics(subQ, sub(grepHits)),
+      bm25: computeMetrics(subQ, sub(bm25Hits)),
+      hybrid: computeMetrics(subQ, sub(hybridHits)),
+    });
+  }
 
   // --- Latence "froid process" : hybrid, un vrai spawn par question --------
   console.log(`spawn froid hybrid (${questions.length}x \`node calepin.mjs query\`, patience)...`);
@@ -261,21 +338,42 @@ async function main() {
     lines.push('');
     lines.push(`Date : ${new Date().toISOString().slice(0, 10)}`);
     lines.push(
-      `Corpus : eval/fixtures-dream/ — ${topics.length} sujets. Langues réelles : 58 sujets rédigés en français ` +
-        `(vocabulaire technique anglais mêlé, normal en fr technique), 1 sujet intégralement en anglais ` +
-        '(`architecture/database-sharding`) et son doublon volontaire en français ' +
-        '(`architecture/postgres-sharding-workspace`, prévu pour le test dream `merge`, pas pour ce bench).'
+      `Corpus : eval/fixtures-dream/ (60 sujets) + eval/fixtures-bench-en/ (20 sujets) — ${topics.length} sujets. ` +
+        'fixtures-dream/ : 58 sujets rédigés en français (vocabulaire technique anglais mêlé, normal en fr technique), ' +
+        '1 sujet intégralement en anglais (`architecture/database-sharding`) et son doublon volontaire en français ' +
+        '(`architecture/postgres-sharding-workspace`, prévu pour le test dream `merge`, pas pour ce bench). ' +
+        'fixtures-bench-en/ : 20 sujets intégralement en anglais (title, keywords monolingues, contenu), même projet ' +
+        'fictif (workspace de messagerie), ajoutés pour donner au cross-langue un vrai volume à mesurer.'
     );
-    lines.push(`Questions : eval/questions-bench.json — 30 questions, écrites avant lecture des scores.`);
+    lines.push(`Questions : eval/questions-bench.json — ${questions.length} questions, écrites avant lecture des scores.`);
     lines.push('');
 
-    lines.push('## Rappel / précision (30 questions, top-5)');
+    lines.push(`## Rappel / précision (${questions.length} questions, top-5)`);
     lines.push('');
     lines.push('| Système | recall@1 | recall@3 | MRR@5 |');
     lines.push('|---|---|---|---|');
     lines.push(`| baseline-grep | ${fmtPct(grepMetrics.recallAt1)} | ${fmtPct(grepMetrics.recallAt3)} | ${grepMetrics.mrrAt5.toFixed(2)} |`);
     lines.push(`| bm25 (\`--no-embed\`) | ${fmtPct(bm25Metrics.recallAt1)} | ${fmtPct(bm25Metrics.recallAt3)} | ${bm25Metrics.mrrAt5.toFixed(2)} |`);
     lines.push(`| hybrid (bm25+e5+rrf) | ${fmtPct(hybridMetrics.recallAt1)} | ${fmtPct(hybridMetrics.recallAt3)} | ${hybridMetrics.mrrAt5.toFixed(2)} |`);
+    lines.push('');
+
+    lines.push('## Rappel / précision par bucket linguistique (top-5)');
+    lines.push('');
+    lines.push(
+      '`requete→sujet` : `fr→fr` questions françaises sur sujet français, `en→fr` questions anglaises sur sujet ' +
+        'français, `fr→en` questions françaises sur sujet anglais (cross-langue pur, sans pont keywords bilingue), ' +
+        '`en→en` questions anglaises sur sujet anglais (monolingue en), `fourre-tout` requêtes keyword-soup sans ' +
+        'marqueur de langue net (voir détection dans bench.mjs).'
+    );
+    lines.push('');
+    lines.push('| Bucket | n | grep r@1 | bm25 r@1 | hybrid r@1 | grep r@3 | bm25 r@3 | hybrid r@3 |');
+    lines.push('|---|---|---|---|---|---|---|---|');
+    for (const row of bucketRows) {
+      lines.push(
+        `| ${row.bucket} | ${row.n} | ${fmtPct(row.grep.recallAt1)} | ${fmtPct(row.bm25.recallAt1)} | ${fmtPct(row.hybrid.recallAt1)} | ` +
+          `${fmtPct(row.grep.recallAt3)} | ${fmtPct(row.bm25.recallAt3)} | ${fmtPct(row.hybrid.recallAt3)} |`
+      );
+    }
     lines.push('');
 
     lines.push('## Latence par query (ms)');
@@ -302,10 +400,11 @@ async function main() {
     lines.push('## Limites (honnêteté du bench)');
     lines.push('');
     lines.push('- **Byterover réel non mesurable** : produit cloud fermé, ce bench ne le compare pas — `bm25` est un *proxy* de son approche déclarée (retrieval lexical structuré, zéro LLM, champs indexés séparément), pas Byterover lui-même.');
-    lines.push('- **Corpus synthétique** écrit par un agent (fixtures-dream/), pas un vrai projet — structure et style peuvent favoriser un retrieval structuré par champs (`<cal-*>`) plus qu\'un vrai repo hétérogène.');
+    lines.push('- **Corpus synthétique** écrit par un agent (fixtures-dream/ + fixtures-bench-en/), pas un vrai projet — structure et style peuvent favoriser un retrieval structuré par champs (`<cal-*>`) plus qu\'un vrai repo hétérogène.');
     lines.push('- **Questions écrites par le même agent** que celui qui a conçu et lit ce corpus — biais de familiarité possible malgré la contrainte de paraphrase et l\'écriture avant lecture des scores.');
-    lines.push('- **Corpus très majoritairement français** : le lot "cross-langue" et "anglais sur sujet anglais" repose presque entièrement sur un seul sujet réellement anglais (`architecture/database-sharding`) — la proportion cible du brief (~8 questions "en/en") n\'était pas atteignable telle quelle vu le corpus réel ; les questions ont été redistribuées vers "anglais → sujet français" (bucket bien couvert par le corpus) plutôt que dupliquées artificiellement sur la même cible.');
+    lines.push('- **Détection de bucket approximative** : la classification fr/en du bucket linguistique repose sur une liste de mots-outils (voir `detectQueryLang` dans bench.mjs), pas un vrai détecteur de langue — les requêtes keyword-soup sans marqueur net tombent volontairement dans `fourre-tout` plutôt que d\'être forcées dans un bucket fr/en arbitraire.');
     lines.push('- **should_cite non mesuré ici** : ce bench mesure recall/MRR/latence/empreinte, pas les faux positifs de citation (voir `eval/run.mjs` pour ça).');
+    lines.push('- **Résultat fr→en inattendu, rapporté tel quel** : sur les 12 questions du bucket, recall@1 nul pour les 3 systèmes (grep, bm25, hybrid) — l\'écart hybrid vs bm25 attendu n\'apparaît qu\'au recall@3 (25% bm25 vs 33% hybrid). Vérifié hors bug : sur un échantillon de ces questions, le rang cosinus e5 du sujet attendu dépassait 60/80 — le modèle `multilingual-e5-small` ne comble pas systématiquement l\'écart cross-langue sur des sujets aussi courts, malgré la vocation multilingue du modèle.');
     lines.push('');
 
     fs.writeFileSync(OUT_FILE, lines.join('\n') + '\n');

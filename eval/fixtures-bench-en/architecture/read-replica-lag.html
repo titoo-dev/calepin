@@ -1,0 +1,8 @@
+<cal-topic title="Read replica lag and read-after-write" keywords="replica, lag, consistency, postgres" created="2026-02-23" updated="2026-02-23">
+  <cal-decision>Reads immediately after a write are routed to the primary, not a replica.</cal-decision>
+  <cal-reason>A user editing their profile saw stale data because the read replica had not caught up yet.</cal-reason>
+  <cal-fact>Replica lag is typically under 200ms but can spike during bulk imports.</cal-fact>
+  <cal-rule>Never route a read-your-own-write query to a replica.</cal-rule>
+  <cal-link>architecture/database-sharding</cal-link>
+  <p>A sticky session marker tracks recent writes so subsequent reads within a few seconds stay on the primary.</p>
+</cal-topic>

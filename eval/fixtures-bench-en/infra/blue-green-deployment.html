@@ -1,0 +1,8 @@
+<cal-topic title="Blue-green deployment for zero downtime" keywords="blue-green, deployment, rollout, downtime" created="2026-03-16" updated="2026-03-16">
+  <cal-decision>Production traffic switches between two identical environments, blue and green, instead of updating instances in place.</cal-decision>
+  <cal-reason>In-place rolling updates occasionally left a brief window where old and new code handled the same request differently.</cal-reason>
+  <cal-fact>The idle environment is fully warmed up and health-checked before traffic is switched.</cal-fact>
+  <cal-rule>Never switch traffic to an environment that has not passed its health check.</cal-rule>
+  <cal-link>infra/deploiement-docker</cal-link>
+  <p>Rolling back is just switching traffic back to the previous environment, no rebuild needed.</p>
+</cal-topic>

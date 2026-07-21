@@ -1,0 +1,8 @@
+<cal-topic title="Transactional outbox for reliable event publishing" keywords="outbox, transactional, events, reliability" created="2026-02-24" updated="2026-02-24">
+  <cal-decision>Business writes and their corresponding event insert happen in the same database transaction.</cal-decision>
+  <cal-reason>Publishing events directly after commit could be lost if the process crashed between commit and publish.</cal-reason>
+  <cal-fact>A background relay polls the outbox table and publishes rows to the message queue.</cal-fact>
+  <cal-rule>Never publish an event before the transaction that produced it has committed.</cal-rule>
+  <cal-link>architecture/message-queue</cal-link>
+  <p>The relay marks rows as published only after the broker acknowledges receipt.</p>
+</cal-topic>

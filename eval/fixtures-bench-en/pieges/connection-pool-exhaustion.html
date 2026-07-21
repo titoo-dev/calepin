@@ -1,0 +1,7 @@
+<cal-topic title="Database connection pool exhaustion" keywords="connection-pool, exhaustion, postgres, leak" created="2026-03-23" updated="2026-03-23">
+  <cal-reason>A code path that threw before releasing its connection back to the pool was leaking connections under load.</cal-reason>
+  <cal-fact>The pool size looked adequate in staging but was exhausted within minutes under production traffic.</cal-fact>
+  <cal-rule>Always release a connection in a finally block, even when the query throws.</cal-rule>
+  <cal-link>pieges/deadlock-migration</cal-link>
+  <p>A pool exhaustion metric alert now fires well before connections actually run out.</p>
+</cal-topic>

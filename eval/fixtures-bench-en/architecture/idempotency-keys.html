@@ -1,0 +1,8 @@
+<cal-topic title="Idempotency keys for write endpoints" keywords="idempotency, retries, api, duplicate" created="2026-02-22" updated="2026-02-22">
+  <cal-decision>Every POST that charges a workspace requires a client-supplied idempotency key.</cal-decision>
+  <cal-reason>A client retrying a timed-out request had charged the same workspace twice.</cal-reason>
+  <cal-fact>Keys are stored for 24 hours and a repeated key returns the original response.</cal-fact>
+  <cal-rule>Never process a write endpoint without checking the idempotency key store first.</cal-rule>
+  <cal-file>src/api/idempotency.ts</cal-file>
+  <p>The key is scoped per endpoint, so the same key on two different routes does not collide.</p>
+</cal-topic>

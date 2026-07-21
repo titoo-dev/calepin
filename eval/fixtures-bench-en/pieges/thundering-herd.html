@@ -1,0 +1,7 @@
+<cal-topic title="Thundering herd on cache expiry" keywords="thundering-herd, cache, stampede, expiry" created="2026-03-22" updated="2026-03-22">
+  <cal-reason>Many keys sharing the same TTL expired at the same moment, sending every request to the database at once.</cal-reason>
+  <cal-fact>The database connection pool saturated for a few seconds every time the shared TTL expired.</cal-fact>
+  <cal-rule>Never set the same fixed TTL on a large batch of keys; add jitter instead.</cal-rule>
+  <cal-link>pieges/race-condition-cache</cal-link>
+  <p>Adding a small random jitter to each TTL spread the expirations enough to stop the spike.</p>
+</cal-topic>
