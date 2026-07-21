@@ -3,7 +3,14 @@
   "version": "0.1.0",
   "description": "Mémoire projet durable pour agents de code — local-first, retrieval hybride BM25+embeddings, partage équipe via git.",
   "type": "module",
-  "keywords": ["ai-agents", "memory", "claude-code", "retrieval", "local-first", "cli"],
+  "keywords": [
+    "ai-agents",
+    "memory",
+    "claude-code",
+    "retrieval",
+    "local-first",
+    "cli"
+  ],
   "author": "titoo-dev",
   "repository": {
     "type": "git",
@@ -11,9 +18,15 @@
   },
   "homepage": "https://github.com/titoo-dev/calepin#readme",
   "bugs": "https://github.com/titoo-dev/calepin/issues",
-  "files": ["calepin.mjs", "lib/", "skills/", "LICENSE", "README.md"],
+  "files": [
+    "calepin.mjs",
+    "lib/",
+    "skills/",
+    "LICENSE",
+    "README.md"
+  ],
   "bin": {
-    "calepin": "./calepin.mjs"
+    "calepin": "calepin.mjs"
   },
   "engines": {
     "node": ">=20"
